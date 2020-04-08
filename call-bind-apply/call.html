@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    /* Function.prototype.ownf = function(){
+      console.log('this:', this)
+    }
+
+    function foo () {
+
+    }
+
+    foo.ownf()  // f foo() {} */
+
+    // 通过配置默认参数的方式，第一个参数如果不传，默认为window
+    Function.prototype.myCall = function (context = window) {
+      // 上下文校验
+      if (typeof this !== 'function') {
+        throw new TypeError('Errors')
+      }
+      // 改变this指向
+      context.fn = this
+      // 截取参数
+      const args = [...arguments].slice(1)
+      // 通过新的上下文调用函数并得到结果
+      const result = context.fn(...args)
+      // 删除临时绑定在context上的方法
+      delete context.fn
+      return result
+    }
+
+    function foo(x, y) {
+      console.log(this, this.a * x * y)
+    }
+
+    obj = {
+      a: 1,
+      b: 2
+    }
+
+    foo.myCall(obj, 2, 3)
+  </script>
+</body>
+</html>

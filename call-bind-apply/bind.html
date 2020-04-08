@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    Function.prototype.myBind = function (context = window) {
+      if (typeof this !== 'function') {
+        throw new TypeError('Error')
+      }
+
+      context.fn = this
+      if (arguments[1]) {
+        arg = arguments[1]
+      } else {
+        arg = []
+      }
+      return ()=> {
+        const result = context.fn(...arg, ...arguments)
+        delete context.fn
+        return result
+      }
+    }
+
+    function foo(x, y) {
+      console.log(this, this.a * x * y)
+    }
+
+    obj = {
+      a: 1,
+      b: 2
+    }
+
+    foo.myBind(obj, [2, 3])()
+  </script>
+</body>
+</html>

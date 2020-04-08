@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 创建3个常量表示Promise的3个状态
+        const PENDING = 'pending'
+        const RESOLVED = 'resolved'
+        const REJECTED = 'rejected'
+
+function MyPromise(fn){
+    // 创建常量that保存this, 因为Promise代码可能会异步执行，用于获取正确的this对象
+    const that = this
+    // 一开始Promise的状态应该是pending
+    this.state = PENDING
+    // value变量用于保存resolve或者reject中传入的值
+    that.value = null
+    // 用于保存then中的回调，因为当执行完Promise时状态可能还是等待中，这时候应该把 then 中的回调保存起来用于状态改变时使用
+    that.resolvedCallbacks = []
+    that.rejectedCallbacks = []
+
+    // 待完善的 resolve 和 reject 函数
+    function resolve(value) {
+        if (value instanceof of MyPromise) {
+            return value.then(resolve, reject)
+        }
+        setTimeout(() => {
+            // 首先两个函数都得判断当前状态是否为等待中，因为规范规定只有等待态才可以改变状态
+            if (that.state === PENDING) {
+                // // 将当前状态更改为对应状态，并且将传入的值赋值给value
+                that.state = RESOLVED
+                that.value = value
+                // 状态改变时，指定回调
+                that.resolvedCallbacks.map(cb => cb(that.value))
+            }
+        }, 0)
+        
+    }
+    function reject(value) {
+        setTimeout(() => {
+            // 首先两个函数都得判断当前状态是否为等待中，因为规范规定只有等待态才可以改变状态
+            if (that.state === PENDING) {
+                // 将当前状态更改为对应状态，并且将传入的值赋值给value
+                that.state = REJECTED
+                that.value = value
+                // 状态改变时执行回调
+                that.rejectedCallbacks.map(cb => cb(that.value))
+            }
+        }, 0)
+        
+    }
+
+    // 待完善执行 fn 函数
+    try {
+        // 执行传入的参数并且将之前两个函数当做参数传进去
+        fn(resolve, reject)
+    }catch (e) {
+        // 可能执行函数过程中会遇到错误，需要捕获错误并且执行 reject 函数
+        reject(e)
+    }
+}
+
+MyPromise.prototype.then = function (onFulfilled, onRejected) {
+    console.log('执行then')
+    const that = this
+    // 判断两个参数是否为函数类型，因为这两个参数是可选参数，如果不是函数，则直接返回相应的value或reason
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : v => v
+    onRejected = typeof onRejected === 'function' ? onRejected : r => {
+        throw r
+    }
+
+    // 当函数是等待态时，就往回调函数数组中push函数
+    if (that.state === PENDING) {
+        return (promise2 = new MyPromise((resolve, reject) => {
+            that.resolvedCallbacks.push(() => {
+                try {
+                    const x = onFulfilled(that.value)
+                    resolutionProcedure(promise2, x, resolve, reject)
+                } catch (r) {
+                    reject(r)
+                }
+            })
+
+            that.rejectedCallbacks.push(() => {
+                try {
+                    const x = onRejected(that.value)
+                    resolutionProcedure(promise2, x, resolve, reject)
+                } catch (r) {
+                    reject(r)
+                }
+            })
+        }))
+    }
+    // 如果不是等待态，就执行相对应的函数
+    if (that.state === RESOLVED) {
+        return (promise2 = new MyPromise((resolve, reject) => {
+            setTimeout(() => {
+            try {
+                const x = onFulfilled(that.value)
+                resolutionProcedure(promise2, x, resolve, reject)
+            } catch (reason) {
+                reject(reason)
+            }
+            })
+        }))
+    }
+
+    if (that.state === REJECTED) {
+        onRejected(that.value)
+    }
+}
+    </script>
+</body>
+</html>

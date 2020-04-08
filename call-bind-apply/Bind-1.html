@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    Function.prototype.myBind = function (context = window) {
+      if (typeof this !== 'function') {
+        throw new TypeError('Error')
+      }
+      const _this = this
+
+      /* if (arguments[1]) {
+        args = arguments[1]
+      } else {
+        args = []
+      } */
+      const args = [...arguments].slice(1)
+      return function F () {
+        // 因为返回了一个函数，所以可能存在用new调用的情况，所以需要判断
+        if (this instanceof F) {
+          return new _this(...args, ...arguments)
+        }
+
+        return _this.apply(context, arsg.concat(...arguments))
+      }
+    }
+  </script>
+</body>
+</html>
